@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "LeetCode Difficulty Hider",
+  "version": "1.0",
+  "description": "Hides the difficulty level of problems on LeetCode and adds a toggle button.",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "content_scripts": [
+    {
+      "matches": ["*://leetcode.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "index.html"
+  },
+  "icons": {
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
