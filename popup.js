@@ -1,32 +1,52 @@
 document.addEventListener("DOMContentLoaded", () => {
   const toggleButton = document.getElementById("toggleButton");
 
-  // Set the initial state based on stored value or default to enabled
-  chrome.storage.sync.get("isEnabled", (data) => {
-    const isEnabled = data.isEnabled !== undefined ? data.isEnabled : true;
+  // Function to update button text
+  function updateButtonText(isEnabled) {
     toggleButton.textContent = isEnabled
       ? "Disable Difficulty Hider"
       : "Enable Difficulty Hider";
+  }
+
+  // Function to save settings to chrome storage
+  function saveSettings(isEnabled) {
+    chrome.storage.local.set({ isEnabled });
+  }
+
+  // Function to load settings from chrome storage
+  function loadSettings(callback) {
+    chrome.storage.local.get("isEnabled", (data) => {
+      callback(data.isEnabled !== undefined ? data.isEnabled : true);
+    });
+  }
+
+  // Set the initial state based on stored value or default to enabled
+  loadSettings((isEnabled) => {
+    updateButtonText(isEnabled);
+
+    // Apply initial state to the current page
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.scripting.executeScript({
+        target: { tabId: tabs[0].id },
+        func: updateDifficultyVisibility,
+        args: [isEnabled],
+      });
+    });
   });
 
   // Toggle the state when the button is clicked
   toggleButton.addEventListener("click", () => {
-    chrome.storage.sync.get("isEnabled", (data) => {
-      const isEnabled = data.isEnabled !== undefined ? data.isEnabled : true;
+    loadSettings((isEnabled) => {
       const newIsEnabled = !isEnabled;
+      saveSettings(newIsEnabled);
+      updateButtonText(newIsEnabled);
 
-      chrome.storage.sync.set({ isEnabled: newIsEnabled }, () => {
-        toggleButton.textContent = newIsEnabled
-          ? "Disable Difficulty Hider"
-          : "Enable Difficulty Hider";
-
-        // Update the current tab immediately
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          chrome.scripting.executeScript({
-            target: { tabId: tabs[0].id },
-            func: updateDifficultyVisibility,
-            args: [newIsEnabled],
-          });
+      // Update the current tab immediately
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.scripting.executeScript({
+          target: { tabId: tabs[0].id },
+          func: updateDifficultyVisibility,
+          args: [newIsEnabled],
         });
       });
     });
