@@ -2,6 +2,10 @@
 
 This Chrome extension hides the difficulty level of problems on LeetCode and provides a toggle button to enable or disable this functionality.
 
+## Demo
+
+![](./demo.gif)
+
 ## Features
 
 - **Hide/Show Difficulty**: The extension automatically hides the difficulty levels of problems on LeetCode.
